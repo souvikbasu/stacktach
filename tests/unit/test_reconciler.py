@@ -136,7 +136,7 @@ class ReconcilerTestCase(StacktachBaseTestCase):
     def test_load_client_json_bridge(self):
         mock_config = self.mox.CreateMockAnything()
         config = {'client_class': 'JSONBridgeClient', 'client': mock_config}
-        nova.JSONBridgeClient(mock_config)
+        nova.ReconcilerJSONBridgeClient(mock_config)
         self.mox.ReplayAll()
         reconciler.Reconciler.load_client(config)
         self.mox.VerifyAll()
@@ -144,7 +144,7 @@ class ReconcilerTestCase(StacktachBaseTestCase):
     def test_load_client_no_class_loads_default_class(self):
         mock_config = self.mox.CreateMockAnything()
         config = {'client': mock_config}
-        nova.JSONBridgeClient(mock_config)
+        nova.ReconcilerJSONBridgeClient(mock_config)
         self.mox.ReplayAll()
         reconciler.Reconciler.load_client(config)
         self.mox.VerifyAll()
@@ -152,7 +152,7 @@ class ReconcilerTestCase(StacktachBaseTestCase):
     def test_load_client_incorrect_class_loads_default_class(self):
         mock_config = self.mox.CreateMockAnything()
         config = {'client_class': 'BadConfigValue', 'client': mock_config}
-        nova.JSONBridgeClient(mock_config)
+        nova.ReconcilerJSONBridgeClient(mock_config)
         self.mox.ReplayAll()
         reconciler.Reconciler.load_client(config)
         self.mox.VerifyAll()
@@ -456,7 +456,7 @@ json_bridge_config = {
 class NovaJSONBridgeClientTestCase(StacktachBaseTestCase):
     def setUp(self):
         self.mox = mox.Mox()
-        self.client = nova.JSONBridgeClient(json_bridge_config)
+        self.client = nova.ReconcilerJSONBridgeClient(json_bridge_config)
         self.mox.StubOutWithMock(requests, 'post')
 
     def tearDown(self):

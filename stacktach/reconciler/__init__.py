@@ -24,8 +24,9 @@ from stacktach import models
 from stacktach.reconciler import exceptions
 from stacktach.reconciler import nova
 from stacktach import stacklog
+from util.json_bridge_client import JSONBridgeClient
 
-DEFAULT_CLIENT = nova.JSONBridgeClient
+DEFAULT_CLIENT = JSONBridgeClient
 
 CONFIG = {
     'client_class': 'JSONBridgeClient',
@@ -52,8 +53,8 @@ class Reconciler(object):
     @classmethod
     def load_client(cls, config):
         client_class = config.get('client_class')
-        if client_class == 'JSONBridgeClient':
-            return nova.JSONBridgeClient(config['client'])
+        if client_class == 'JSONBridgeClient' or client_class == 'ReconcilerJSONBridgeClient':
+            return nova.ReconcilerJSONBridgeClient(config['client'])
         else:
             return DEFAULT_CLIENT(config['client'])
 

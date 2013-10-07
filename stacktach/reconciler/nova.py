@@ -1,8 +1,7 @@
-import requests
-
 from stacktach import utils as stackutils
 from stacktach.reconciler import exceptions
 from stacktach.reconciler.utils import empty_reconciler_instance
+from util.json_bridge_client import JSONBridgeClient
 
 GET_INSTANCE_QUERY = \
     "SELECT i.*, it.flavorid FROM instances i INNER JOIN " \
@@ -25,28 +24,7 @@ SELECT * FROM instance_system_metadata
 GET_INSTANCE_SYSTEM_METADATA %= ('%s', METADATA_FIELDS)
 
 
-def _json(result):
-    if callable(result.json):
-        return result.json()
-    else:
-        return result.json
-
-
-class JSONBridgeClient(object):
-    src_str = 'json_bridge:nova_db'
-
-    def __init__(self, config):
-        self.config = config
-
-    def _url_for_region(self, region):
-        return self.config['url'] + self.config['databases'][region]
-
-    def _do_query(self, region, query):
-        data = {'sql': query}
-        credentials = (self.config['username'], self.config['password'])
-        return _json(requests.post(self._url_for_region(region), data,
-                                   verify=False, auth=credentials))
-
+class ReconcilerJSONBridgeClient(JSONBridgeClient):
     def _to_reconciler_instance(self, instance, metadata=None):
         r_instance = empty_reconciler_instance()
         r_instance.update({
@@ -73,7 +51,7 @@ class JSONBridgeClient(object):
         return r_instance
 
     def _get_instance_meta(self, region, uuid):
-        results = self._do_query(region, GET_INSTANCE_SYSTEM_METADATA % uuid)
+        results = self.do_query(region, GET_INSTANCE_SYSTEM_METADATA % uuid)
         metadata = {}
         for result in results['result']:
             key = result['key']
@@ -82,7 +60,7 @@ class JSONBridgeClient(object):
         return metadata
 
     def get_instance(self, region, uuid, get_metadata=False):
-        results = self._do_query(region, GET_INSTANCE_QUERY % uuid)['result']
+        results = self.do_query(region, GET_INSTANCE_QUERY % uuid)['result']
         if len(results) > 0:
             metadata = None
             if get_metadata:
