@@ -17,8 +17,15 @@ class JSONBridgeClient(object):
     def _url_for_region(self, region):
         return self.config['url'] + self.config['databases'][region]
 
-    def do_query(self, region, query):
+    def _url_for_region_and_cell(self, region, cell):
+        return self.config['url'] + ('prod.%s.%s.nova' % (region, cell))
+
+    def do_query(self, region, query, cell=None):
         data = {'sql': query}
         credentials = (self.config['username'], self.config['password'])
-        return _json(requests.post(self._url_for_region(region), data,
+        if cell is not None:
+            url = self._url_for_region_and_cell(region, cell)
+        else:
+            url = self._url_for_region(region)
+        return _json(requests.post(url, data,
                                    verify=False, auth=credentials))
